@@ -18,20 +18,31 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
           
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
           channel: 'stable'
+          cache: true
           
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          # Some packages might need a fix for modern Flutter
+          # flutter pub upgrade
         
       - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: |
+          # Clean build to avoid cache issues
+          flutter clean
+          flutter pub get
+          # Build with verbose output to catch errors
+          flutter build apk --release --no-tree-shake-icons --verbose
         
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
