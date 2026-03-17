@@ -27,19 +27,20 @@ jobs:
           channel: 'stable'
           cache: true
           
-      - name: Install dependencies
+      - name: Clear Flutter cache
         run: |
-          flutter pub get
-          # Some packages might need a fix for modern Flutter
-          # flutter pub upgrade
+          flutter clean
+          rm -rf ~/.gradle/caches
+          rm -rf build/
+          
+      - name: Install dependencies
+        run: flutter pub get
         
       - name: Build APK
         run: |
-          # Clean build to avoid cache issues
-          flutter clean
-          flutter pub get
-          # Build with verbose output to catch errors
-          flutter build apk --release --no-tree-shake-icons --verbose
+          flutter build apk --release --no-tree-shake-icons
+        env:
+          GRADLE_OPTS: "-Xmx2048m -XX:MaxPermSize=512m"
         
       - name: Upload APK
         if: success()
